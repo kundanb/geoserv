@@ -18,6 +18,10 @@ const app = express();
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 
+app.get('/', (_, res) => {
+  res.send('Welcome to Geoserv API!');
+});
+
 app.post('/', (req, res) => {
   /** @type {{ pass: string, name: string, url: string }} */
   const { pass, name, url } = req.body;
