@@ -66,7 +66,7 @@ app.get('/search/:searchQuery', (req, res) => {
 
   const likeParams = [
     searchQuery + '%',
-    ' ' + searchQuery + '%',
+    '% ' + searchQuery + '%',
     '%' + searchQuery + '%',
   ];
 
