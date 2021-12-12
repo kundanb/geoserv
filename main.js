@@ -58,14 +58,36 @@ app.get('/search/:searchQuery', (req, res) => {
 
   const conn = mysql.createConnection(mysqlConnConfig);
   const query = 'SELECT id, name FROM features WHERE name LIKE ? LIMIT ?';
-  const values = [`%${searchQuery}%`, resultsCount || 10];
+  const limit = resultsCount || 10;
 
-  conn.query(query, values, (err, results) => {
-    if (err) return console.log(err.sqlMessage), res.sendStatus(500);
-    res.send([...results]);
-  });
+  const likeParams = [
+    searchQuery + '%',
+    ' ' + searchQuery + '%',
+    '%' + searchQuery + '%',
+  ];
 
-  conn.end();
+  let searchResults = [];
+
+  const search = (i = 0) => {
+    if (searchResults.length >= limit || i == likeParams.length) {
+      conn.end();
+      return res.send(searchResults.slice(0, 10));
+    }
+
+    conn.query(query, [likeParams[i], limit], (err, results) => {
+      if (err) {
+        conn.end();
+        console.log(err.sqlMessage);
+        return res.sendStatus(500);
+      }
+
+      results = results.filter(r => !searchResults.some(s => s.id === r.id));
+      searchResults.push(...results);
+      search(i + 1);
+    });
+  };
+
+  search();
 });
 
 const PORT = process.env.PORT || 5010;
