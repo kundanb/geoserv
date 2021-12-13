@@ -1,6 +1,7 @@
 require('dotenv').config();
 
 const express = require('express');
+const cors = require('cors');
 const mysql = require('mysql');
 
 /** @type {import('mysql').ConnectionConfig} */
@@ -15,6 +16,7 @@ const adminPass = process.env.ADMIN_PASS;
 
 const app = express();
 
+app.use(cors({ origin: '*' }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 
@@ -42,7 +44,7 @@ app.post('/', (req, res) => {
 });
 
 app.get('/:id', (req, res) => {
-  const { id } = req.params;
+  const id = +req.params.id;
 
   const conn = mysql.createConnection(mysqlConnConfig);
   const query = 'SELECT name, url FROM features WHERE id = ?';
@@ -56,19 +58,13 @@ app.get('/:id', (req, res) => {
   conn.end();
 });
 
-app.get('/search/:searchQuery', (req, res) => {
-  const { searchQuery } = req.params;
-  const { resultsCount } = req.query;
+app.get('/search/:q', (req, res) => {
+  const { q } = req.params;
+  const limit = +req.query.limit || 10;
 
   const conn = mysql.createConnection(mysqlConnConfig);
   const query = 'SELECT id, name FROM features WHERE name LIKE ? LIMIT ?';
-  const limit = resultsCount || 10;
-
-  const likeParams = [
-    searchQuery + '%',
-    '% ' + searchQuery + '%',
-    '%' + searchQuery + '%',
-  ];
+  const likeParams = [q + '%', '% ' + q + '%', '%' + q + '%'];
 
   let searchResults = [];
 
