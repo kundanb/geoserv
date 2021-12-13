@@ -36,7 +36,7 @@ app.post('/', (req, res) => {
   const values = [name, url];
 
   conn.query(query, values, err => {
-    if (err) return console.log(err.sqlMessage), res.sendStatus(500);
+    if (err) return console.log(err), res.sendStatus(500);
     res.sendStatus(200);
   });
 
@@ -50,7 +50,7 @@ app.get('/:id', (req, res) => {
   const query = 'SELECT name, url FROM features WHERE id = ?';
 
   conn.query(query, id, (err, results) => {
-    if (err) return console.log(err.sqlMessage), res.sendStatus(500);
+    if (err) return console.log(err), res.sendStatus(500);
     if (!results.length) return res.sendStatus(404);
     res.send(results[0]);
   });
@@ -77,7 +77,7 @@ app.get('/search/:q', (req, res) => {
     conn.query(query, [likeParams[i], limit], (err, results) => {
       if (err) {
         conn.end();
-        console.log(err.sqlMessage);
+        console.log(err);
         return res.sendStatus(500);
       }
 
